@@ -1,0 +1,15 @@
+Input:profiling_traces_time，profiling_traces_freq，attack_traces_time，attack_traces_freq，labels
+  Define dual-channel subnetwork N_time and N_freq:
+       Each is a stack of 4 × (Conv1d → BatchNorm → ReLU → MaxPool)
+  Define fusion module F:
+        Concatenate features from N_time and N_freq→ Dense layer → ReLU → Dropout
+  Define classification head C:FullyConnected → Softmax 
+  Define loss L = CrossEntropy + optional weight decay
+  For epoch = 1 to E do
+      For each batch (t_time, t_freq, y):
+      F_time = N_time(t_time)，f_freq = N_freq(t_freq)
+      f_concat = Concat(f_time, f_freq)
+      f_fused = F(f_concat)
+      Backpropagate & update parameters
+  End epoch
+  logits = C(f_fused); p = Softmax(logits)
